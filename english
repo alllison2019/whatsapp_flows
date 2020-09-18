@@ -1,0 +1,459 @@
+{
+  "description": "A New Flow",
+  "states": [
+    {
+      "name": "Trigger",
+      "type": "trigger",
+      "transitions": [
+        {
+          "next": "welcome_message",
+          "event": "incomingMessage"
+        },
+        {
+          "event": "incomingCall"
+        },
+        {
+          "event": "incomingRequest"
+        },
+        {
+          "event": "incomingParent"
+        }
+      ],
+      "properties": {
+        "offset": {
+          "x": 0,
+          "y": 0
+        }
+      }
+    },
+    {
+      "name": "split_language",
+      "type": "split-based-on",
+      "transitions": [
+        {
+          "event": "noMatch"
+        },
+        {
+          "next": "user_options",
+          "event": "match",
+          "conditions": [
+            {
+              "friendly_name": "If value equal_to 1",
+              "arguments": [
+                "{{widgets.welcome_message.inbound.Body}}"
+              ],
+              "type": "equal_to",
+              "value": "1"
+            }
+          ]
+        },
+        {
+          "next": "run_subflow_spanish",
+          "event": "match",
+          "conditions": [
+            {
+              "friendly_name": "If value equal_to 2",
+              "arguments": [
+                "{{widgets.welcome_message.inbound.Body}}"
+              ],
+              "type": "equal_to",
+              "value": "2"
+            }
+          ]
+        },
+        {
+          "next": "run_subflow_portuguese",
+          "event": "match",
+          "conditions": [
+            {
+              "friendly_name": "If value equal_to 3",
+              "arguments": [
+                "{{widgets.welcome_message.inbound.Body}}"
+              ],
+              "type": "equal_to",
+              "value": "3"
+            }
+          ]
+        }
+      ],
+      "properties": {
+        "input": "{{widgets.welcome_message.inbound.Body}}",
+        "offset": {
+          "x": -50,
+          "y": 370
+        }
+      }
+    },
+    {
+      "name": "welcome_message",
+      "type": "send-and-wait-for-reply",
+      "transitions": [
+        {
+          "next": "split_language",
+          "event": "incomingMessage"
+        },
+        {
+          "event": "timeout"
+        },
+        {
+          "event": "deliveryFailure"
+        }
+      ],
+      "properties": {
+        "offset": {
+          "x": 30,
+          "y": 160
+        },
+        "service": "{{trigger.message.InstanceSid}}",
+        "channel": "{{trigger.message.ChannelSid}}",
+        "from": "{{flow.channel.address}}",
+        "body": "Hello! Thank you for your message. For English reply \"1\", para Español responda \"2\",\npara resposta em portugues \"3\"",
+        "timeout": "3600"
+      }
+    },
+    {
+      "name": "user_options",
+      "type": "send-and-wait-for-reply",
+      "transitions": [
+        {
+          "next": "split_1",
+          "event": "incomingMessage"
+        },
+        {
+          "event": "timeout"
+        },
+        {
+          "event": "deliveryFailure"
+        }
+      ],
+      "properties": {
+        "offset": {
+          "x": -310,
+          "y": 610
+        },
+        "service": "{{trigger.message.InstanceSid}}",
+        "channel": "{{trigger.message.ChannelSid}}",
+        "from": "{{flow.channel.address}}",
+        "body": "We can help you with a few things. Just pick a number (e.g. reply \"3\") and we will route you to the appropriate resource:\n1. New Deals\n2. Order Status\n3. Technical Support\n4. Membership renewal\n5. Upgrade Plan",
+        "timeout": "3600"
+      }
+    },
+    {
+      "name": "split_1",
+      "type": "split-based-on",
+      "transitions": [
+        {
+          "event": "noMatch"
+        },
+        {
+          "next": "new_deal",
+          "event": "match",
+          "conditions": [
+            {
+              "friendly_name": "If value equal_to 5",
+              "arguments": [
+                "{{widgets.user_options.inbound.Body}}"
+              ],
+              "type": "equal_to",
+              "value": "1"
+            }
+          ]
+        },
+        {
+          "next": "order_status",
+          "event": "match",
+          "conditions": [
+            {
+              "friendly_name": "If value equal_to 2",
+              "arguments": [
+                "{{widgets.user_options.inbound.Body}}"
+              ],
+              "type": "equal_to",
+              "value": "2"
+            }
+          ]
+        },
+        {
+          "next": "technical_support",
+          "event": "match",
+          "conditions": [
+            {
+              "friendly_name": "If value equal_to 3",
+              "arguments": [
+                "{{widgets.user_options.inbound.Body}}"
+              ],
+              "type": "equal_to",
+              "value": "3"
+            }
+          ]
+        },
+        {
+          "next": "membership_renewal",
+          "event": "match",
+          "conditions": [
+            {
+              "friendly_name": "If value equal_to 4",
+              "arguments": [
+                "{{widgets.user_options.inbound.Body}}"
+              ],
+              "type": "equal_to",
+              "value": "4"
+            }
+          ]
+        },
+        {
+          "next": "upgrade_plan",
+          "event": "match",
+          "conditions": [
+            {
+              "friendly_name": "If value equal_to 5",
+              "arguments": [
+                "{{widgets.user_options.inbound.Body}}"
+              ],
+              "type": "equal_to",
+              "value": "5"
+            }
+          ]
+        }
+      ],
+      "properties": {
+        "input": "{{widgets.user_options.inbound.Body}}",
+        "offset": {
+          "x": -310,
+          "y": 840
+        }
+      }
+    },
+    {
+      "name": "send_message_1",
+      "type": "send-message",
+      "transitions": [
+        {
+          "event": "sent"
+        },
+        {
+          "event": "failed"
+        }
+      ],
+      "properties": {
+        "offset": {
+          "x": -130,
+          "y": 1350
+        },
+        "service": "{{trigger.message.InstanceSid}}",
+        "channel": "{{trigger.message.ChannelSid}}",
+        "from": "{{flow.channel.address}}",
+        "to": "{{contact.channel.address}}",
+        "body": "If you still need help, please send us a WhatsApp to the following number 1-800-455-5555"
+      }
+    },
+    {
+      "name": "run_subflow_spanish",
+      "type": "run-subflow",
+      "transitions": [
+        {
+          "event": "completed"
+        },
+        {
+          "next": "http_1",
+          "event": "failed"
+        }
+      ],
+      "properties": {
+        "flow_sid": "FW3defaa4282e489ce01937df476632d5e",
+        "flow_revision": "31",
+        "offset": {
+          "x": 630,
+          "y": 610
+        }
+      }
+    },
+    {
+      "name": "http_1",
+      "type": "make-http-request",
+      "transitions": [
+        {
+          "event": "success"
+        },
+        {
+          "event": "failed"
+        }
+      ],
+      "properties": {
+        "offset": {
+          "x": 630,
+          "y": 840
+        },
+        "method": "POST",
+        "content_type": "application/x-www-form-urlencoded;charset=utf-8",
+        "url": "https://webhook.site/faf53933-3c9b-4e28-b8f2-bb2fd2d08073"
+      }
+    },
+    {
+      "name": "new_deal",
+      "type": "send-message",
+      "transitions": [
+        {
+          "next": "send_message_1",
+          "event": "sent"
+        },
+        {
+          "event": "failed"
+        }
+      ],
+      "properties": {
+        "offset": {
+          "x": -820,
+          "y": 1080
+        },
+        "service": "{{trigger.message.InstanceSid}}",
+        "channel": "{{trigger.message.ChannelSid}}",
+        "from": "{{flow.channel.address}}",
+        "to": "{{contact.channel.address}}",
+        "body": "Thank you for your interest in our new arrivals. There is promo code running this week. Just add PROMO during your checkout and you will receive a 10% discount."
+      }
+    },
+    {
+      "name": "order_status",
+      "type": "send-message",
+      "transitions": [
+        {
+          "next": "send_message_1",
+          "event": "sent"
+        },
+        {
+          "event": "failed"
+        }
+      ],
+      "properties": {
+        "offset": {
+          "x": -470,
+          "y": 1080
+        },
+        "service": "{{trigger.message.InstanceSid}}",
+        "channel": "{{trigger.message.ChannelSid}}",
+        "from": "{{flow.channel.address}}",
+        "to": "{{contact.channel.address}}",
+        "body": "For more information on your order please go to your portal and do the following:\n1. Tap Your Orders in the app menu.\n2. Tap on the open or completed order that you need the details for.\n3. Tap on Order Details to get all the necessary details."
+      }
+    },
+    {
+      "name": "technical_support",
+      "type": "send-message",
+      "transitions": [
+        {
+          "next": "send_message_1",
+          "event": "sent"
+        },
+        {
+          "event": "failed"
+        }
+      ],
+      "properties": {
+        "offset": {
+          "x": -100,
+          "y": 1070
+        },
+        "service": "{{trigger.message.InstanceSid}}",
+        "channel": "{{trigger.message.ChannelSid}}",
+        "from": "{{flow.channel.address}}",
+        "to": "{{contact.channel.address}}",
+        "body": "For support you can contact us via chat on our website. Someone will be with you shortly or you can email us at support@techunique.com"
+      }
+    },
+    {
+      "name": "membership_renewal",
+      "type": "send-message",
+      "transitions": [
+        {
+          "next": "send_message_1",
+          "event": "sent"
+        },
+        {
+          "event": "failed"
+        }
+      ],
+      "properties": {
+        "offset": {
+          "x": 260,
+          "y": 1080
+        },
+        "service": "{{trigger.message.InstanceSid}}",
+        "channel": "{{trigger.message.ChannelSid}}",
+        "from": "{{flow.channel.address}}",
+        "to": "{{contact.channel.address}}",
+        "body": "We appreciate your loyalty. Feel free to add PROMO during checkout and receive a month off."
+      }
+    },
+    {
+      "name": "upgrade_plan",
+      "type": "send-message",
+      "transitions": [
+        {
+          "next": "send_message_1",
+          "event": "sent"
+        },
+        {
+          "event": "failed"
+        }
+      ],
+      "properties": {
+        "offset": {
+          "x": 600,
+          "y": 1080
+        },
+        "service": "{{trigger.message.InstanceSid}}",
+        "channel": "{{trigger.message.ChannelSid}}",
+        "from": "{{flow.channel.address}}",
+        "to": "{{contact.channel.address}}",
+        "body": "To upgrade your plan please go to your portal and do the following:\n1. Tap My Plan in the app menu.\n2. Select your preferred plan \n3. Complete the checkout\nIf you have any issues feel free to chat our team to this whatsapp number 1-800-455-5555"
+      }
+    },
+    {
+      "name": "run_subflow_portuguese",
+      "type": "run-subflow",
+      "transitions": [
+        {
+          "next": "http_2",
+          "event": "completed"
+        },
+        {
+          "event": "failed"
+        }
+      ],
+      "properties": {
+        "flow_sid": "FW125699be36cf0d14d6971cc77a1b7b05",
+        "flow_revision": "15",
+        "offset": {
+          "x": 990,
+          "y": 610
+        }
+      }
+    },
+    {
+      "name": "http_2",
+      "type": "make-http-request",
+      "transitions": [
+        {
+          "event": "success"
+        },
+        {
+          "event": "failed"
+        }
+      ],
+      "properties": {
+        "offset": {
+          "x": 1010,
+          "y": 830
+        },
+        "method": "GET",
+        "content_type": "application/x-www-form-urlencoded;charset=utf-8",
+        "url": "https://webhook.site/d96b6211-a51a-4064"
+      }
+    }
+  ],
+  "initial_state": "Trigger",
+  "flags": {
+    "allow_concurrent_calls": true
+  }
+}
