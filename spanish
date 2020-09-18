@@ -1,0 +1,311 @@
+{
+  "description": "A New Flow",
+  "states": [
+    {
+      "name": "Trigger",
+      "type": "trigger",
+      "transitions": [
+        {
+          "event": "incomingMessage"
+        },
+        {
+          "event": "incomingCall"
+        },
+        {
+          "event": "incomingRequest"
+        },
+        {
+          "next": "user_options",
+          "event": "incomingParent"
+        }
+      ],
+      "properties": {
+        "offset": {
+          "x": 0,
+          "y": 0
+        }
+      }
+    },
+    {
+      "name": "user_options",
+      "type": "send-and-wait-for-reply",
+      "transitions": [
+        {
+          "next": "split_1",
+          "event": "incomingMessage"
+        },
+        {
+          "event": "timeout"
+        },
+        {
+          "event": "deliveryFailure"
+        }
+      ],
+      "properties": {
+        "offset": {
+          "x": 10,
+          "y": 280
+        },
+        "service": "{{trigger.message.InstanceSid}}",
+        "channel": "{{trigger.message.ChannelSid}}",
+        "from": "{{flow.channel.address}}",
+        "body": "Te podemos ayudar con las siguientes opciones. Solo responde con el numero (Ex. 3) y te enviaremos la respuesta adecuada:\n1. Promociones\n2. My pedido \n3. Soporte tecnico\n4. Renovacion de Membresia\n5. Un nuevo plan",
+        "timeout": "3600"
+      }
+    },
+    {
+      "name": "split_1",
+      "type": "split-based-on",
+      "transitions": [
+        {
+          "event": "noMatch"
+        },
+        {
+          "next": "new_deal",
+          "event": "match",
+          "conditions": [
+            {
+              "friendly_name": "If value equal_to 5",
+              "arguments": [
+                "{{widgets.user_options.inbound.Body}}"
+              ],
+              "type": "equal_to",
+              "value": "1"
+            }
+          ]
+        },
+        {
+          "next": "order_status",
+          "event": "match",
+          "conditions": [
+            {
+              "friendly_name": "If value equal_to 2",
+              "arguments": [
+                "{{widgets.user_options.inbound.Body}}"
+              ],
+              "type": "equal_to",
+              "value": "2"
+            }
+          ]
+        },
+        {
+          "next": "technical_support",
+          "event": "match",
+          "conditions": [
+            {
+              "friendly_name": "If value equal_to 3",
+              "arguments": [
+                "{{widgets.user_options.inbound.Body}}"
+              ],
+              "type": "equal_to",
+              "value": "3"
+            }
+          ]
+        },
+        {
+          "next": "membership_renewal",
+          "event": "match",
+          "conditions": [
+            {
+              "friendly_name": "If value equal_to 4",
+              "arguments": [
+                "{{widgets.user_options.inbound.Body}}"
+              ],
+              "type": "equal_to",
+              "value": "4"
+            }
+          ]
+        },
+        {
+          "next": "upgrade_plan",
+          "event": "match",
+          "conditions": [
+            {
+              "friendly_name": "If value equal_to 5",
+              "arguments": [
+                "{{widgets.user_options.inbound.Body}}"
+              ],
+              "type": "equal_to",
+              "value": "5"
+            }
+          ]
+        }
+      ],
+      "properties": {
+        "input": "{{widgets.user_options.inbound.Body}}",
+        "offset": {
+          "x": -220,
+          "y": 560
+        }
+      }
+    },
+    {
+      "name": "function_delay",
+      "type": "run-function",
+      "transitions": [
+        {
+          "next": "send_message_1",
+          "event": "success"
+        },
+        {
+          "event": "fail"
+        }
+      ],
+      "properties": {
+        "service_sid": "default",
+        "offset": {
+          "x": -60,
+          "y": 1600
+        },
+        "url": "https://peru-gibbon-6071.twil.io/time"
+      }
+    },
+    {
+      "name": "send_message_1",
+      "type": "send-message",
+      "transitions": [
+        {
+          "event": "sent"
+        },
+        {
+          "event": "failed"
+        }
+      ],
+      "properties": {
+        "offset": {
+          "x": -60,
+          "y": 1820
+        },
+        "service": "{{trigger.message.InstanceSid}}",
+        "channel": "{{trigger.message.ChannelSid}}",
+        "from": "{{flow.channel.address}}",
+        "to": "{{contact.channel.address}}",
+        "body": "Si todavia necesitas ayuda, envianos un WhatsApp al siguiente numero  1-800-455-5555"
+      }
+    },
+    {
+      "name": "new_deal",
+      "type": "send-message",
+      "transitions": [
+        {
+          "next": "function_delay",
+          "event": "sent"
+        },
+        {
+          "event": "failed"
+        }
+      ],
+      "properties": {
+        "offset": {
+          "x": -790,
+          "y": 920
+        },
+        "service": "{{trigger.message.InstanceSid}}",
+        "channel": "{{trigger.message.ChannelSid}}",
+        "from": "{{flow.channel.address}}",
+        "to": "{{contact.channel.address}}",
+        "body": "Gracias por tu interes en nuestros nuevos productos. Incluye la palabra PROMO en tu checkout y recive un 10% de descuento."
+      }
+    },
+    {
+      "name": "order_status",
+      "type": "send-message",
+      "transitions": [
+        {
+          "next": "function_delay",
+          "event": "sent"
+        },
+        {
+          "event": "failed"
+        }
+      ],
+      "properties": {
+        "offset": {
+          "x": -440,
+          "y": 920
+        },
+        "service": "{{trigger.message.InstanceSid}}",
+        "channel": "{{trigger.message.ChannelSid}}",
+        "from": "{{flow.channel.address}}",
+        "to": "{{contact.channel.address}}",
+        "body": "Para mas informacion acerca de tu pedido ingresa al portal y sigue las siguientes instrucciones:\n1. Haz click en el App menu\n2. Ingresa la informacion acerca de tu pedido.\n3. Haz click en Detalles."
+      }
+    },
+    {
+      "name": "technical_support",
+      "type": "send-message",
+      "transitions": [
+        {
+          "next": "function_delay",
+          "event": "sent"
+        },
+        {
+          "event": "failed"
+        }
+      ],
+      "properties": {
+        "offset": {
+          "x": -80,
+          "y": 910
+        },
+        "service": "{{trigger.message.InstanceSid}}",
+        "channel": "{{trigger.message.ChannelSid}}",
+        "from": "{{flow.channel.address}}",
+        "to": "{{contact.channel.address}}",
+        "body": "Para soporte tecnico nos puedes contactar via chat o envia un correo a support@techunique.com"
+      }
+    },
+    {
+      "name": "membership_renewal",
+      "type": "send-message",
+      "transitions": [
+        {
+          "next": "function_delay",
+          "event": "sent"
+        },
+        {
+          "event": "failed"
+        }
+      ],
+      "properties": {
+        "offset": {
+          "x": 290,
+          "y": 900
+        },
+        "service": "{{trigger.message.InstanceSid}}",
+        "channel": "{{trigger.message.ChannelSid}}",
+        "from": "{{flow.channel.address}}",
+        "to": "{{contact.channel.address}}",
+        "body": "Gracias por escogernos! Agrega la palabra PROMO durante el checkout y recibiras un mes GRATIS."
+      }
+    },
+    {
+      "name": "upgrade_plan",
+      "type": "send-message",
+      "transitions": [
+        {
+          "next": "function_delay",
+          "event": "sent"
+        },
+        {
+          "event": "failed"
+        }
+      ],
+      "properties": {
+        "offset": {
+          "x": 660,
+          "y": 900
+        },
+        "service": "{{trigger.message.InstanceSid}}",
+        "channel": "{{trigger.message.ChannelSid}}",
+        "from": "{{flow.channel.address}}",
+        "to": "{{contact.channel.address}}",
+        "body": "Para actualizar tu plan ingresa al portal y haz lo siguiente: \n1. Haz click en Mi Plan en el menu principal \n2. Selecciona tu plan \n3. Completa el checkout\nSi necesitas hablar con un miembro de nuestro equipo mandanos un WhatsApp al suiguiente numero 1-800-455-5555"
+      }
+    }
+  ],
+  "initial_state": "Trigger",
+  "flags": {
+    "allow_concurrent_calls": true
+  }
+}
